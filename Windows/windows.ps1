@@ -1,6 +1,5 @@
-# currently must be 'runas' administrator for proper install
+# Currently must be 'RUN AS' administrator for proper install
 # echos can be removed for silent install
-# i left them for troubleshooting
 
 # directory to check for splunk installation
 $loc = 'C:\Program Files\*'
