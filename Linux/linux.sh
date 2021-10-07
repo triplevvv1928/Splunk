@@ -3,8 +3,6 @@
 # to many remote hosts via ssh and common Unix commands.
 # For "real" use, this script needs ERROR DETECTION AND LOGGING!!
 # --Variables that you must set -----
-# Set username using by splunkd to run.
-  SPLUNK_RUN_USER="splunk_User"
 
 # Populate this file with a list of hosts that this script should install to,
 # with one host per line. This must be specified in the form that should
@@ -28,29 +26,32 @@
 # host.  Specify the host and management (not web) port of the deployment server
 # that will be managing these forwarder instances.
 # Example 1.2.3.4:8089
-  DEPLOY_SERVER="192.168.0.40:8089"
+  DEPLOY_SERVER="x.x.x.x:8089"
+
+# Forward Server
+  FORWARD_SERVER="X.X.X.X:9997"
+
 
 # Set the seed app folder name for deploymentclien.conf
   DEPLOY_APP_FOLDER_NAME="seed_all_deploymentclient"
 # Set the new Splunk admin password
-  PASSWORD="khunglong123"
+  PASSWORD="newpassword"
 
 REMOTE_SCRIPT_DEPLOY="
   cd /opt
   sudo $WGET_CMD
-  sudo tar xvzf $INSTALL_FILE
-  sudo rm $INSTALL_FILE
-  sudo useradd $SPLUNK_RUN_USER
-  sudo chown -R $SPLUNK_RUN_USER:$SPLUNK_RUN_USER /opt/splunkforwarder
+  sudo tar xvzf $INSTALL_FILE -C /opt
+  sudo rm -rf $INSTALL_FILE
   echo \"[user_info]
 USERNAME = admin
 PASSWORD = $PASSWORD\" > /opt/splunkforwarder/etc/system/local/user-seed.conf  
   mkdir -p /opt/splunkforwarder/etc/apps/$DEPLOY_APP_FOLDER_NAME/local
-  echo \"[target-broker:deploymentServer]
+  echo \"[deployment-client]
+[target-broker:deploymentServer]
 targetUri = $DEPLOY_SERVER\" > /opt/splunkforwarder/etc/apps/$DEPLOY_APP_FOLDER_NAME/local/deploymentclient.conf
-  sudo -u $SPLUNK_RUN_USER /opt/splunkforwarder/bin/splunk start --accept-license --answer-yes --auto-ports --no-prompt
-  sudo /opt/splunkforwarder/bin/splunk enable boot-start -user $SPLUNK_RUN_USER
-
+  sudo -u $SPLUNK_RUN_USER /opt/splunkforwarder/bin/splunk start --accept-license
+  sudo /opt/splunkforwarder/bin/splunk enable boot-start
+  sudo /opt/splunkforwarder/bin/splunk add forward-server $FORWARD_SERVER
   exit
  "
 
